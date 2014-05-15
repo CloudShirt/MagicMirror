@@ -399,5 +399,26 @@ jQuery(document).ready(function($) {
 		
 
 	})();
+
+	(function updateOpenHAB()
+        {
+                var temp = "";
+                $.getJSON('http://myopenhabIP:8080/rest/items/MagicMirrorTXT/?type=json', {}, function(json, textStatus) {
+                        if (json) {
+                                temp = json.state;
+                        }
+                        $('.openhab').updateWithText(temp,2000);
+                        if (temp != "") {
+                                $('.openhab').fadeIn(2000);
+                                $('.lower-third').fadeOut(2000);
+                        } else {
+                                $('.openhab').fadeOut(2000);
+                                $('.lower-third').fadeIn(2000);
+                        }
+                });
+                setTimeout(function() {
+                        updateOpenHAB();
+                }, 5000);
+        })();
 	
 });
