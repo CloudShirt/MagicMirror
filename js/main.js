@@ -39,6 +39,7 @@ function kmh2beaufort(kmh)
 jQuery(document).ready(function($) {
 
 	var news = [];
+	var newshead = [];
 	var newsIndex = 0;
 
 	var eventList = [];
@@ -97,7 +98,7 @@ jQuery(document).ready(function($) {
 
 
 	var weatherParams = {
-		'q':'Baarn,Netherlands',
+		'q':'Dortmund,Germany',
 		'units':'metric',
 		'lang':lang
 	};
@@ -144,8 +145,12 @@ jQuery(document).ready(function($) {
         	eventList = [];
 
         	for (var i in events) {
+				
         		var e = events[i];
         		for (var key in e) {
+				
+				
+				
         			var value = e[key];
 					var seperator = key.search(';');
 					if (seperator >= 0) {
@@ -175,6 +180,7 @@ jQuery(document).ready(function($) {
         		if (days >= 0) {
 	        		eventList.push({'description':e.SUMMARY,'days':days});
         		}
+				
         	};
         	eventList.sort(function(a,b){return a.days-b.days});
 
@@ -191,6 +197,7 @@ jQuery(document).ready(function($) {
 
 
 		for (var i in eventList) {
+		if(i <= 5){
 			var e = eventList[i];
 			var days = e.days;
 
@@ -205,6 +212,7 @@ jQuery(document).ready(function($) {
 			table.append(row);
 
 			opacity -= 1 / eventList.length;
+			}
 		}
 
 		$('.calendar').updateWithText(table,1000);
@@ -218,14 +226,9 @@ jQuery(document).ready(function($) {
 	{
 
 		var compliments = [
-			'Hey, handsome!',
-			'Hi, sexy!',
-			'Hello, beauty!',
-			'You look sexy!',
-			'Wow, you look hot!',
-			'Looking good today!',
-			'You look nice!',
-			'Enjoy your day!'
+			'Du bist der Beste!',
+			'Schau dich an... Hammer!',
+			'Heute ist dein Tag!'
 		];
 
 		while (compliment == lastCompliment) {
@@ -325,14 +328,20 @@ jQuery(document).ready(function($) {
 
 			var forecastTable = $('<table />').addClass('forecast-table');
 			var opacity = 1;
+			var rowhead = $('<tr />').css('opacity', opacity);
+			
+			rowhead.append($('<td/>').addClass('day').html('Datum'));
+			rowhead.append($('<td/>').addClass('temp-min').html('Min.'));
+			rowhead.append($('<td/>').addClass('temp-max').html('Max.'));
+			forecastTable.append(rowhead);
 			for (var i in forecastData) {
 				var forecast = forecastData[i];
 				var dt = new Date(forecast.timestamp);
 				var row = $('<tr />').css('opacity', opacity);
 
 				row.append($('<td/>').addClass('day').html(dayAbbr[dt.getDay()]));
-				row.append($('<td/>').addClass('temp-max').html(roundVal(forecast.temp_max)));
 				row.append($('<td/>').addClass('temp-min').html(roundVal(forecast.temp_min)));
+				row.append($('<td/>').addClass('temp-max').html(roundVal(forecast.temp_max)));
 
 				forecastTable.append(row);
 				opacity -= 0.155;
@@ -349,14 +358,23 @@ jQuery(document).ready(function($) {
 
 	(function fetchNews() {
 		$.feedToJson({
-			feed:'http://feeds.nos.nl/nosjournaal?format=rss',
+			feed:'http://www.faz.net/rss/aktuell/',
 			//feed:'http://www.nu.nl/feeds/rss/achterklap.rss',
 			//feed:'http://www.nu.nl/feeds/rss/opmerkelijk.rss',
 			success: function(data){
-				news = [];
+				newshead = [];
+				news 	 = [];
 				for (var i in data.item) {
 					var item = data.item[i];
-					news.push(item.title);
+					
+					var pos = item.description.search("<p>")
+					var desc = item.description.substring(pos, item.description.length);
+					var endpos = desc.search("</p>")
+					var desc = desc.substring(0, endpos);
+					news.push(desc);
+					
+					newshead.push(item.title);
+					
 				}
 			}
 		});
@@ -366,14 +384,20 @@ jQuery(document).ready(function($) {
 	})();
 
 	(function showNews() {
+		var newsHead = newshead[newsIndex];
 		var newsItem = news[newsIndex];
+		
+		$('.newshead').updateWithText(newsHead,2000);
 		$('.news').updateWithText(newsItem,2000);
 
 		newsIndex--;
 		if (newsIndex < 0) newsIndex = news.length - 1;
-		setTimeout(function() {
-			showNews();
-		}, 5500);
+			setTimeout(function() {
+				showNews();
+			}, 5500);	
+		
+		
+
 	})();
 	
 });
